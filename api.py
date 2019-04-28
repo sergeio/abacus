@@ -9,6 +9,12 @@ from flask import jsonify
 app = Flask(__name__)
 
 
+@app.route('/git', methods=['GET'])
+def get_git_head_sha():
+    r = git.Repo('.')
+    return r.commit(r.head).hexsha
+
+
 @app.route('/events', methods=['GET'])
 def get_events():
     event_json = request.get_json()
