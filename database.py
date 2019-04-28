@@ -1,10 +1,12 @@
 import os
+import pwd
 
 import psycopg2
 
 
 def get_connection_cursor():
-    conn = psycopg2.connect(database='test', user=os.environ['USER'])
+    username = pwd.getpwuid(os.getuid()).pw_name
+    conn = psycopg2.connect(database='test', user=username)
     cursor = conn.cursor()
     return conn, cursor
 
