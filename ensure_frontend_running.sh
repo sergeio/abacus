@@ -5,7 +5,7 @@
 # make executable
 
 process='npm'
-makerun='npm start --prefix /root/code/abacus/frontend'
+makerun='/root/code/abacus/frontend/start.sh'
 
 if ps ax | grep -v grep | grep "$process" > /dev/null
 then
