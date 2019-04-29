@@ -1,8 +1,9 @@
-import git
+import datetime
 
 import schema
 import database
 
+import git
 from flask import Flask
 from flask import request
 from flask import jsonify
@@ -15,9 +16,23 @@ def get_git_head_sha():
     return r.commit(r.head).hexsha
 
 
+@app.route('/events_by_day', methods=['GET'])
+def get_events_by_day():
+    conn, cursor = database.get_connection_cursor()
+    cursor.execute('''
+        SELECT count(1), date
+        FROM events
+        GROUP BY date
+        LIMIT 1000;
+    ''')
+    rows = cursor.fetchmany(1000)
+    column_names = [desc[0] for desc in cursor.description]
+    data = [dict(zip(column_names, row)) for row in rows]
+    return jsonify(data)
+
+
 @app.route('/events', methods=['GET'])
 def get_events():
-    event_json = request.get_json()
     conn, cursor = database.get_connection_cursor()
     cursor.execute('SELECT * FROM events LIMIT 1000;')
     rows = cursor.fetchmany(1000)
@@ -30,7 +45,7 @@ def get_events():
 def post_new_event():
     event_json = request.get_json()
     for field in schema.events:
-        if field not in event_json:
+        if field not in event_json and field not in ('datetime', 'date'):
             return 'Missing at least one field: ' + repr(field), 400
 
     conn, cursor = database.get_connection_cursor()
@@ -38,9 +53,9 @@ def post_new_event():
         '''
         INSERT INTO events (
             event_type, event_target, user_id, path, referrer, email, handle,
-            platform, datetime
+            platform, datetime, date
         ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
         )''',
         (
             event_json['event_type'],
@@ -51,7 +66,8 @@ def post_new_event():
             event_json['email'],
             event_json['handle'],
             event_json['platform'],
-            event_json['datetime'],
+            datetime.datetime.utcnow().isoformat(),
+            datetime.datetime.utcnow().date().isoformat(),
         )
     )
     # slow. should reuse one connection

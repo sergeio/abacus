@@ -8,4 +8,5 @@ events = {
     'handle': str,
     'platform': str,
     'datetime': str,
+    'date': str,
 }

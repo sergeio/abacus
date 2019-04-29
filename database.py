@@ -23,7 +23,8 @@ def create_tables(conn, cursor):
             email varchar(80),
             handle varchar(80),
             platform varchar(80),
-            datetime timestamp without time zone
+            datetime timestamp without time zone,
+            date date,
         );
     """)
     conn.commit()
