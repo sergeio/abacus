@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 @app.route('/git', methods=['GET'])
 def get_git_head_sha():
-    r = git.Repo('.')
+    r = git.Repo('~/code/abacus')
     c = r.commit(r.head)
     return "%s\n%s\n%s" % (c.hexsha, c.message, c.author)
 
