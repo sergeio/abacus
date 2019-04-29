@@ -6,24 +6,34 @@ import requests
 # TODO: Tests modify local db bad bad bad
 
 
+def make_request(method='get', resource='/', json={}):
+    url = 'http://localhost:8080%s' % resource
+    r = getattr(requests, method)(url, json=json)
+    return r
+
+def make_new_event(**args):
+    default = {
+        'event_type': 'click',
+        'event_target': 'div123',
+        'user_id': 31,
+        'path': '/foo',
+        'referrer': 'facebook',
+        'email': 'test@example.com',
+        'handle': 'coolguy223',
+        'platform': 'iOS',
+    }
+    default.update(args)
+    r = make_request('post', '/event', json=default)
+    return r
+
+
 def test_event_post():
-    r = requests.post(
-        'http://localhost:8080/event',
-        json={
-            'event_type': 'click',
-            'event_target': 'div123',
-            'user_id': 31,
-            'path': '/foo',
-            'referrer': 'facebook',
-            'email': 'test@example.com',
-            'handle': 'coolguy223',
-            'platform': 'iOS',
-        })
+    r = make_new_event()
     return r.status_code == 200
 
 
 def test_get_events_by_day():
-    r = requests.get('http://localhost:8080/events_by_day')
+    r = make_request('post', '/events_by_day')
     before = len(r.json())
     today = datetime.datetime.utcnow().date()
     count_before = next(row['count']
@@ -32,8 +42,42 @@ def test_get_events_by_day():
                             row['date'],
                             '%a, %d %b %Y %H:%M:%S %Z'
                         ).date() == today)
-    test_event_post()
-    r = requests.get('http://localhost:8080/events_by_day')
+    make_new_event()
+    r = make_request('post', '/events_by_day')
+    count_after = next(row['count']
+                       for row in r.json()
+                       if datetime.datetime.strptime(
+                           row['date'],
+                           '%a, %d %b %Y %H:%M:%S %Z'
+                       ).date() == today)
+    return count_before + 1 == count_after
+
+
+def test_get_events_by_day_with_filters():
+    make_new_event(user_id=99, referrer='google')
+    r = make_request(
+        'post',
+        '/events_by_day',
+        json={'filters': {'user_id': 99, 'referrer': 'google'}})
+    before = len(r.json())
+    today = datetime.datetime.utcnow().date()
+    count_before = next(row['count']
+                        for row in r.json()
+                        if datetime.datetime.strptime(
+                            row['date'],
+                            '%a, %d %b %Y %H:%M:%S %Z'
+                        ).date() == today)
+
+    # Only user_id=99 should count
+    make_new_event(user_id=99, referrer='google')
+    make_new_event(user_id=101, referrer='google')
+    make_new_event(user_id=101, referrer='google')
+
+    r = make_request(
+        'post',
+        '/events_by_day',
+        json={'filters': {'user_id': 99, 'referrer': 'google'}})
+
     count_after = next(row['count']
                        for row in r.json()
                        if datetime.datetime.strptime(
@@ -44,11 +88,11 @@ def test_get_events_by_day():
 
 
 def test_get_events():
-    r = requests.get('http://localhost:8080/events')
+    r = make_request('get', '/events')
     before = len(r.json())
-    test_event_post()
-    test_event_post()
-    r = requests.get('http://localhost:8080/events')
+    make_new_event()
+    make_new_event()
+    r = make_request('get', '/events')
 
     # No key or value in table is None
     for row in r.json():

@@ -1,4 +1,6 @@
 import datetime
+import itertools
+import logging
 
 import schema
 import database
@@ -16,15 +18,32 @@ def get_git_head_sha():
     return r.commit(r.head).hexsha
 
 
-@app.route('/events_by_day', methods=['GET'])
+@app.route('/events_by_day', methods=['post'])
 def get_events_by_day():
     conn, cursor = database.get_connection_cursor()
-    cursor.execute('''
+    event_json = request.get_json() or {}
+
+    filter_clause = ''
+    filters = event_json.get('filters', {})
+    filter_values = []
+    if filters:
+        filter_strings = []
+        for key in schema.events:
+            if key in filters:
+                filter_strings.append(key + '=%s')
+                filter_values.append(filters.get(key))
+
+        filter_clause = 'WHERE ' + ' AND '.join(filter_strings)
+
+    query = '''
         SELECT count(1), date
         FROM events
+        %s
         GROUP BY date
         LIMIT 1000;
-    ''')
+    ''' % filter_clause
+
+    cursor.execute(query, filter_values)
     rows = cursor.fetchmany(1000)
     column_names = [desc[0] for desc in cursor.description]
     data = [dict(zip(column_names, row)) for row in rows]
