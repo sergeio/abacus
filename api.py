@@ -15,7 +15,8 @@ app = Flask(__name__)
 @app.route('/git', methods=['GET'])
 def get_git_head_sha():
     r = git.Repo('.')
-    return r.commit(r.head).hexsha
+    c = r.commit(r.head)
+    return c.hexsha + '\n' + c.message + '\n' + c.author
 
 
 @app.route('/events_by_day', methods=['post'])
