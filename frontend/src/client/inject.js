@@ -4,8 +4,9 @@ import {
 } from './util';
 
 window.addEventListener('click', (event) => {
-    const options = {
-      url: 'http://localhost:8080/event',
+  const options = {
+        url: (window.location.protocol + '//' + window.location.hostname +
+          ':8080/event'),
         data: {
             event_type: 'click',
             event_target: calculateSelector(event),
