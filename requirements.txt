@@ -1,5 +1,6 @@
 psycopg2
 flask
+flask-cors
 ipython
 gitpython
 requests

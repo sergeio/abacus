@@ -6,10 +6,13 @@ import schema
 import database
 
 import git
+from flask_cors import CORS
 from flask import Flask
 from flask import request
 from flask import jsonify
 app = Flask(__name__)
+# TODO: Lock down CORS.  Security vulnerability
+CORS(app)
 
 
 @app.route('/git', methods=['GET'])
@@ -26,6 +29,7 @@ def get_events_by_day():
 
     filter_clause = ''
     filters = event_json.get('filters', {})
+    logging.warn(filters)
     filter_values = []
     if filters:
         filter_strings = []
@@ -43,6 +47,9 @@ def get_events_by_day():
         GROUP BY date
         LIMIT 1000;
     ''' % filter_clause
+
+    logging.warn(filter_values);
+    logging.warn(query);
 
     cursor.execute(query, filter_values)
     rows = cursor.fetchmany(1000)
