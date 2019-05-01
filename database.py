@@ -24,7 +24,7 @@ def create_tables(conn, cursor):
             handle varchar(80),
             platform varchar(80),
             datetime timestamp without time zone,
-            date date,
+            date date
         );
     """)
     conn.commit()
