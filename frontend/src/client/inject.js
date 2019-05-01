@@ -5,7 +5,7 @@ import {
 
 window.addEventListener('click', (event) => {
     const options = {
-        url: 'http://localhost:8080',
+      url: 'http://localhost:8080/event',
         data: {
             event_type: 'click',
             event_target: calculateSelector(event),
@@ -15,6 +15,9 @@ window.addEventListener('click', (event) => {
             email: 'test@example.com',
             handle: 'coolguy223',
             platform: 'iOS',
+        },
+        onSuccess: (response) => {
+            console.info(response);
         },
         onError: (error) => {
             console.warn(error);

@@ -70,7 +70,7 @@ def get_events():
 
 @app.route('/event', methods=['POST'])
 def post_new_event():
-    event_json = request.get_json()
+    event_json = request.get_json() or {}
     for field in schema.events:
         if field not in event_json and field not in ('datetime', 'date'):
             return 'Missing at least one field: ' + repr(field), 400

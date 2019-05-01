@@ -16,7 +16,7 @@ def create_tables(conn, cursor):
         CREATE TABLE events (
             id serial PRIMARY KEY,
             event_type varchar(80),
-            event_target varchar(80),
+            event_target varchar(1000),
             user_id INTEGER,
             path varchar(300),
             referrer varchar(80),
