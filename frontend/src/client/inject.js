@@ -17,9 +17,7 @@ window.addEventListener('click', (event) => {
             handle: 'coolguy223',
             platform: 'iOS',
         },
-        onSuccess: (response) => {
-            console.info(response);
-        },
+        onSuccess: (response) => {},
         onError: (error) => {
             console.warn(error);
         }

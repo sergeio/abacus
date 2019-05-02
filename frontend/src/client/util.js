@@ -68,8 +68,13 @@ export const post = (options) => {
             let response;
 
             try {
-                response = JSON.parse(request.response);
+                if (request.response) {
+                    response = JSON.parse(request.response);
+                } else {
+                    response = "No response"
+                }
             } catch (e) {
+                console.warn(e);
                 onError(request.response);
             }
             onSuccess(response);
