@@ -1,3 +1,5 @@
+.PHONY: install_runner_aliases deps_py deps_js deps postgres test clean
+
 install_runner_aliases:
 	for runner in \
 		~/code/puller/ensure_puller_running.sh \
@@ -10,7 +12,25 @@ install_runner_aliases:
 		; fi \
 	done
 
+venv:
+	virtualenv venv
+
+deps_py: venv
+	# "Making python dependencies"
+	venv/bin/pip install -r requirements.txt
+
+deps_js: frontend/package.json
+	# "Making javascript dependencies"
+	npm install --prefix ~/code/abacus/frontend
+
+deps: deps_py deps_js
+
+postgres:
+	venv/bin/python database.py
+
+clean:
+	rm -rf venv/
+	rm -rf frontend/node_modules/
+
 test:
-	if command -v $$(basename ~/a/watchfiles) ; then \
-		echo 'yes'; \
-	fi
+	venv/bin/python tests.py
