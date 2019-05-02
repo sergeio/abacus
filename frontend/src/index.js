@@ -7,11 +7,17 @@ import App from './App';
 import rootReducer from './reducers';
 import * as serviceWorker from './serviceWorker';
 
+import { ThemeProvider } from '@material-ui/styles';
+import theme from './theme';
+
+
 const store = createStore(rootReducer);
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <ThemeProvider theme={theme}>
+        <App />
+    </ThemeProvider>
   </Provider>,
   document.getElementById('root')
 );
