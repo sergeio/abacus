@@ -67,6 +67,33 @@ def get_events():
     data = [dict(zip(column_names, row)) for row in rows]
     return jsonify(data)
 
+@app.route('/event_names', methods=['GET'])
+def get_all_events():
+    conn, cursor = database.get_connection_cursor()
+    cursor.execute('SELECT * from event_names')
+    rows = cursor.fetchmany(1000)
+    column_names = [desc[0] for desc in cursor.description]
+    data = [dict(zip(column_names, row)) for row in rows]
+    return jsonify(data)
+
+
+@app.route('/new_event_name', methods=['POST'])
+def name_new_event():
+    event_json = request.get_json() or {}
+    logging.warn(event_json)
+    event_name = event_json.get('event_name')
+    event_target = event_json.get('event_target')
+    event_type = event_json.get('event_type')
+    if not all((event_name, event_target, event_type)):
+        return ('Need event_name, event_target, event_type.  Got %s' %
+                event_json, 400)
+
+    conn, cursor = database.get_connection_cursor()
+    cursor.execute('SELECT upsert_event_name(%s, %s);',
+                   (event_type + ' ' + event_target, event_name))
+    conn.commit()
+    return 'ok', 200
+
 
 @app.route('/event', methods=['POST'])
 def post_new_event():

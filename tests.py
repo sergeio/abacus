@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
+import random
+import string
+
 import requests
 
 
@@ -8,7 +11,7 @@ import requests
 
 def make_request(method='get', resource='/', json={}):
     url = 'http://localhost:8080%s' % resource
-    r = getattr(requests, method)(url, json=json)
+    r = getattr(requests, method.lower())(url, json=json)
     return r
 
 def make_new_event(**args):
@@ -100,6 +103,34 @@ def test_get_events():
             assert k is not None, row
             assert v is not None, row
     return len(r.json()) == before + 2
+
+
+def test_make_new_event_name():
+    random_name = ''.join(random.choice(string.letters) for _ in xrange(10))
+    r = make_request(
+        method='post',
+        resource='/new_event_name',
+        json={
+            'event_name': 'first' + random_name,
+            'event_target': 'test div div div',
+            'event_type': 'click',
+        },
+    )
+    r = make_request(
+        method='post',
+        resource='/new_event_name',
+        json={
+            'event_name': random_name,
+            'event_target': 'test div div div',
+            'event_type': 'click',
+        },
+    )
+    r = make_request('get', '/event_names')
+    r_data = r.json()
+    mappings = {row['event_name']: row['event_type_and_target']
+                for row in r_data}
+    return ('first' + random_name not in mappings and
+            random_name in mappings)
 
 
 def main():
