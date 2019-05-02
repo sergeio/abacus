@@ -62,7 +62,8 @@ function mapDispatchToProps(dispatch) {
   return {
     getFilteredEvents: (filterKey, filterValue) => {
       fetch(
-        'http://10.0.0.203:8080/events_by_day',
+        (window.location.protocol + '//' + window.location.hostname +
+          ':8080/events_by_day'),
         {
           method: 'POST',
           headers: {
