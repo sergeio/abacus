@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import './App.css';
 
 import './client/inject';
+import Dashboard from './Dashboard';
 
 
 class App extends Component {
@@ -35,23 +36,23 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <Dropdown
-            values={[
-              'user_id', 'event_type', 'event_target', 'path', 'referrer',
-              'email', 'handle', 'platform', 'datetime', 'date',
-            ]}
-            onChange={ this.onChangeFilterKey }
-          />
-          <TextBox onSubmit={ this.onSubmitFilterValue } />
-          <Table data={this.props.filteredEvents} />
-          <p>
-            "{this.state.filterKey}"
-            <br />
-            "{this.state.filterValue}"
-            <br />
-          </p>
-        </header>
+          <Dashboard>
+              <Dropdown
+                values={[
+                  'user_id', 'event_type', 'event_target', 'path', 'referrer',
+                  'email', 'handle', 'platform', 'datetime', 'date',
+                ]}
+                onChange={ this.onChangeFilterKey }
+              />
+              <TextBox onSubmit={ this.onSubmitFilterValue } />
+              <Table data={this.props.filteredEvents} />
+              <p>
+                "{this.state.filterKey}"
+                <br />
+                "{this.state.filterValue}"
+                <br />
+              </p>
+          </Dashboard>
       </div>
     );
   }
