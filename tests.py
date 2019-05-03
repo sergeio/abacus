@@ -2,6 +2,7 @@
 import datetime
 import random
 import string
+import sys
 
 import requests
 
@@ -39,20 +40,14 @@ def test_get_events_by_day():
     r = make_request('post', '/events_by_day')
     before = len(r.json())
     today = datetime.datetime.utcnow().date()
-    count_before = next(row['count']
-                        for row in r.json()
-                        if datetime.datetime.strptime(
-                            row['date'],
-                            '%a, %d %b %Y %H:%M:%S %Z'
-                        ).date() == today)
+    count_before = next(
+        row['count'] for row in r.json()
+        if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
     make_new_event()
     r = make_request('post', '/events_by_day')
-    count_after = next(row['count']
-                       for row in r.json()
-                       if datetime.datetime.strptime(
-                           row['date'],
-                           '%a, %d %b %Y %H:%M:%S %Z'
-                       ).date() == today)
+    count_after = next(
+        row['count'] for row in r.json()
+        if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
     return count_before + 1 == count_after
 
 
@@ -64,12 +59,9 @@ def test_get_events_by_day_with_filters():
         json={'filters': {'user_id': 99, 'referrer': 'google'}})
     before = len(r.json())
     today = datetime.datetime.utcnow().date()
-    count_before = next(row['count']
-                        for row in r.json()
-                        if datetime.datetime.strptime(
-                            row['date'],
-                            '%a, %d %b %Y %H:%M:%S %Z'
-                        ).date() == today)
+    count_before = next(
+        row['count'] for row in r.json()
+        if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
 
     # Only user_id=99 should count
     make_new_event(user_id=99, referrer='google')
@@ -81,12 +73,9 @@ def test_get_events_by_day_with_filters():
         '/events_by_day',
         json={'filters': {'user_id': 99, 'referrer': 'google'}})
 
-    count_after = next(row['count']
-                       for row in r.json()
-                       if datetime.datetime.strptime(
-                           row['date'],
-                           '%a, %d %b %Y %H:%M:%S %Z'
-                       ).date() == today)
+    count_after = next(
+        row['count'] for row in r.json()
+        if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
     return count_before + 1 == count_after
 
 
@@ -139,15 +128,16 @@ def main():
         if name.startswith('test_'):
             if func():
                 passed += 1
-                print '✓', name
+                print '.', name
             else:
                 failed += 1
-                print '✗', name
+                print 'X  ', name
     if failed == 0:
         print 'all pass'
     else:
         print
         print ' FAILED %d test(s)' % failed
+        sys.exit(1)
 
 
 if __name__ == '__main__':

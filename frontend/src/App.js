@@ -3,6 +3,8 @@ import { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import './App.css';
+import { Line } from 'react-chartjs';
+
 
 import './client/inject';
 import Dashboard from './Dashboard';
@@ -45,7 +47,7 @@ class App extends Component {
                 onChange={ this.onChangeFilterKey }
               />
               <TextBox onSubmit={ this.onSubmitFilterValue } />
-              <Table data={this.props.filteredEvents} />
+              <Chart data={this.props.filteredEvents} />
               <p>
                 "{this.state.filterKey}"
                 <br />
@@ -91,17 +93,60 @@ function mapStateToProps(state) {
 }
 App = connect(mapStateToProps, mapDispatchToProps)(App);
 
-class Table extends Component {
+
+class Chart extends Component {
 
   static propTypes = {
     data: PropTypes.any,
   }
 
-  render() {
-    return "Data:" + (JSON.stringify(this.props.data) || "");
+  /*
+   * If no matching events happened on a particular day, it will be missing
+   * from the data set.  We want to fill in those days, and mark them as
+   * having 0 events.
+   */
+  dataWithoutGaps(dataWithGaps) {
+    // Assumes data is sorted by date.
+    const labels = [];
+    const dataPoints = [];
+    let expected = null;
+    this.props.data.forEach(({count, date}) => {
+      const day = new Date(date);
+      if (!expected) expected = day;
+      while (expected < day) {
+        labels.push(expected.toDateString());
+        dataPoints.push(0);
+        // Increment date by 1 day
+        expected.setDate(expected.getDate() + 1)
+      }
+      labels.push(day.toDateString());
+      dataPoints.push(count);
+      expected = new Date(day);
+      expected.setDate(expected.getDate() + 1)
+    });
+    return {labels, dataPoints};
   }
 
-}
+  render() {
+    const { labels, dataPoints } = this.dataWithoutGaps(this.props.data);
+    const data = {
+      labels: labels,
+      datasets: [
+        {
+          label: "My First dataset",
+          fillColor: "rgba(220,220,220,0.2)",
+          strokeColor: "rgba(220,220,220,1)",
+          pointColor: "rgba(220,220,220,1)",
+          pointStrokeColor: "#fff",
+          pointHighlightFill: "#fff",
+          pointHighlightStroke: "rgba(220,220,220,1)",
+          data: dataPoints
+        },
+      ]
+    };
+    return <Line data={data} options={{}} width="600" height="250"/>
+  }
+};
 
 
 class Dropdown extends Component {
