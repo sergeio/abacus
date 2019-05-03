@@ -55,6 +55,7 @@ def get_events_by_day():
     rows = cursor.fetchmany(1000)
     column_names = [desc[0] for desc in cursor.description]
     data = [dict(zip(column_names, row)) for row in rows]
+    data.filter(lambda row: row['date'])
     data.sort(key=lambda row: row['date'])
 
     for row in data:
