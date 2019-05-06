@@ -84,18 +84,27 @@ def get_all_events():
 
 @app.route('/new_event_name', methods=['POST'])
 def name_new_event():
+    schema = [
+        'event_name',
+        'email',
+        'event_target',
+        'event_type',
+        'handle',
+        'path',
+        'platform',
+        'referrer',
+        'user_id',
+    ]
     event_json = request.get_json() or {}
     logging.warn(event_json)
-    event_name = event_json.get('event_name')
-    event_target = event_json.get('event_target')
-    event_type = event_json.get('event_type')
-    if not all((event_name, event_target, event_type)):
-        return ('Need event_name, event_target, event_type.  Got %s' %
-                event_json, 400)
+    if 'event_name' not in event_json:
+        return 'Missing event_name in json', 400
 
+    values_to_set = tuple(event_json.get(field) for field in schema)
     conn, cursor = database.get_connection_cursor()
-    cursor.execute('SELECT upsert_event_name(%s, %s);',
-                   (event_type + ' ' + event_target, event_name))
+    cursor.execute('SELECT upsert_event_name(%s);' %
+                       ', '.join('f_%s := %%s' % field for field in schema),
+                   values_to_set)
     conn.commit()
     return 'ok', 200
 
