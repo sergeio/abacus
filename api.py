@@ -68,6 +68,23 @@ def get_all_events():
     return jsonify(models.models_to_dicts(rows))
 
 
+@app.route('/popular_events', methods=['GET'])
+def get_popular_events():
+    query = database.session.query(
+        func.count(models.Event.id),
+        models.Event.event_type,
+        models.Event.event_target,
+    ).group_by(
+        models.Event.event_type,
+        models.Event.event_target,
+    ).order_by(
+        func.count(models.Event.id).desc()
+    ).limit(100)
+    data = query.all()
+    return jsonify(models.values_to_dicts(
+        data, column_names=('count', 'event_type', 'event_target')))
+
+
 @app.route('/new_event_name', methods=['POST'])
 def name_new_event():
     schema = [
@@ -106,6 +123,7 @@ def post_new_event():
     new_event = models.Event(
         date=datetime.datetime.utcnow().isoformat(),
         datetime=datetime.datetime.utcnow().date().isoformat(),
+
         event_type=event_json['event_type'],
         event_target=event_json['event_target'],
         user_id=event_json['user_id'],
