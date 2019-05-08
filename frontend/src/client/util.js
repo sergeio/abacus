@@ -1,3 +1,7 @@
+const port = '8080';
+const baseUrl =
+  `${window.location.protocol}//${window.location.hostname}:${port}`;
+
 export function calculateSelector(event) {
     var element = event.target;
     var selector = element.tagName + ":nth-child(" + indexOf(element) + ")";
@@ -14,6 +18,7 @@ export function calculateSelector(event) {
 
 export function indexOf(element) {
     var parent = element.parentNode;
+    if (!parent) return -1;
     var child, index = 1;
     if (!parent) return -1;
     for (child = parent.firstElementChild;
@@ -52,15 +57,17 @@ export const getParams = () => {
 };
 
 export const post = (options) => {
-    const {
-        url,
+    let {
+        resource,
         data,
         onSuccess,
         onError,
     } = options;
     const request = new XMLHttpRequest();
 
-    request.open('POST', url, true);
+    if (resource[0] !== '/') resource = '/' + resource;
+
+    request.open('POST', baseUrl+resource, true);
     request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     request.setRequestHeader('Accept', 'application/json');
 
@@ -72,7 +79,7 @@ export const post = (options) => {
                 if (request.response) {
                     response = JSON.parse(request.response);
                 } else {
-                    response = "No response"
+                    response = 'No response';
                 }
             } catch (e) {
                 console.warn(e);
@@ -92,14 +99,16 @@ export const post = (options) => {
 };
 
 export const get = (options) => {
-    const {
-        url,
+    let {
+        resource,
         onSuccess,
         onError,
     } = options;
     const request = new XMLHttpRequest();
 
-    request.open('GET', url, true);
+    if (resource[0] !== '/') resource = '/' + resource;
+
+    request.open('GET', baseUrl+resource, true);
     request.setRequestHeader('Accept', 'application/json');
 
     request.onload = () => {
@@ -131,13 +140,13 @@ export const get = (options) => {
     return request;
 };
 
-export const poll = (url, onSuccess, onError, timeoutDuration) => {
+export const poll = (resource, onSuccess, onError, timeoutDuration) => {
     return get({
-        url,
+        resource,
         onSuccess: (response) => {
             if (response.status === 204) {
                 window.setTimeout(() => {
-                    poll(url, onSuccess, onError);
+                    poll(resource, onSuccess, onError);
                 }, timeoutDuration || 2500);
             } else {
                 onSuccess(response);

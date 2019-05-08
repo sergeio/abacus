@@ -122,16 +122,14 @@ def test_make_new_event_name():
         },
     )
     r = make_request('get', '/event_names')
-    r_data = r
-    mappings = {row['event_name']: row for row in r_data}
+    mappings = {row['event_name']: row for row in r}
     return ('first_' + random_name not in mappings and
             random_name in mappings)
 
 
 def test_popular_events():
     r = make_request('get', '/popular_events')
-    r_data = r
-    popular = r_data[0]
+    popular = r[0]
     # TODO: brittle test: depends on other sources to create events, and
     # assumes that clicks are most popular events
     return popular['count'] > 0 and popular['event_type'] == 'click'
