@@ -34,3 +34,6 @@ clean:
 
 test:
 	venv/bin/python tests.py
+
+api_debug:
+	./start.sh 1
