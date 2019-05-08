@@ -3,6 +3,7 @@ import itertools
 import logging
 
 import schema
+import models
 import database
 
 import git
@@ -10,6 +11,8 @@ from flask_cors import CORS
 from flask import Flask
 from flask import request
 from flask import jsonify
+from sqlalchemy import func
+
 app = Flask(__name__)
 # TODO: Lock down CORS.  Security vulnerability
 CORS(app)
@@ -24,39 +27,25 @@ def get_git_head_sha():
 
 @app.route('/events_by_day', methods=['post'])
 def get_events_by_day():
-    conn, cursor = database.get_connection_cursor()
+    session = database.session
     event_json = request.get_json() or {}
 
-    filter_clause = ''
     filters = event_json.get('filters', {})
-    logging.warn(filters)
-    filter_values = []
+
+    query = session.query(func.count(models.Event.id), models.Event.date)
     if filters:
-        filter_strings = []
-        for key in schema.events:
-            if key in filters:
-                filter_strings.append(key + '=%s')
-                filter_values.append(filters.get(key))
+        valid_filters = set([c.key for c in models.Event.__table__.columns])
+        filters = dict((k, v) for (k, v) in filters.iteritems()
+                   if k in valid_filters)
+        query = query.filter_by(**filters)
 
-        filter_clause = 'WHERE ' + ' AND '.join(filter_strings)
+    query = query.group_by(models.Event.date)
+    query = query.order_by(models.Event.date)
+    query = query.limit(1000)
+    data = query.all()
+    data = models.values_to_dicts(data, column_names=('count', 'date'))
 
-    query = '''
-        SELECT count(1), date
-        FROM events
-        %s
-        GROUP BY date
-        LIMIT 1000;
-    ''' % filter_clause
-
-    logging.warn(filter_values);
-    logging.warn(query);
-
-    cursor.execute(query, filter_values)
-    rows = cursor.fetchmany(1000)
-    column_names = [desc[0] for desc in cursor.description]
-    data = [dict(zip(column_names, row)) for row in rows]
     data = filter(lambda row: row.get('date'), data)
-    data.sort(key=lambda row: row['date'])
 
     for row in data:
         row['date'] = str(row['date'])
@@ -65,21 +54,18 @@ def get_events_by_day():
 
 @app.route('/events', methods=['GET'])
 def get_events():
-    conn, cursor = database.get_connection_cursor()
-    cursor.execute('SELECT * FROM events LIMIT 1000;')
-    rows = cursor.fetchmany(1000)
-    column_names = [desc[0] for desc in cursor.description]
-    data = [dict(zip(column_names, row)) for row in rows]
-    return jsonify(data)
+    session = database.session
+    query = session.query(models.Event).limit(1000)
+    rows = query.all()
+    return jsonify(models.models_to_dicts(rows))
+
 
 @app.route('/event_names', methods=['GET'])
 def get_all_events():
-    conn, cursor = database.get_connection_cursor()
-    cursor.execute('SELECT * from event_names')
-    rows = cursor.fetchmany(1000)
-    column_names = [desc[0] for desc in cursor.description]
-    data = [dict(zip(column_names, row)) for row in rows]
-    return jsonify(data)
+    session = database.session
+    query = session.query(models.EventName).limit(1000)
+    rows = query.all()
+    return jsonify(models.models_to_dicts(rows))
 
 
 @app.route('/new_event_name', methods=['POST'])
@@ -100,12 +86,12 @@ def name_new_event():
     if 'event_name' not in event_json:
         return 'Missing event_name in json', 400
 
-    values_to_set = tuple(event_json.get(field) for field in schema)
-    conn, cursor = database.get_connection_cursor()
-    cursor.execute('SELECT upsert_event_name(%s);' %
-                       ', '.join('f_%s := %%s' % field for field in schema),
-                   values_to_set)
-    conn.commit()
+    session = database.session
+    text_query = 'SELECT upsert_event_name({});'.format(
+        ', '.join('f_{col} := :{col}'.format(col=col)
+                  for col in schema))
+    cursor = session.execute(text_query,
+                             {col: event_json.get(col) for col in schema})
     return 'ok', 200
 
 
@@ -116,30 +102,19 @@ def post_new_event():
         if field not in event_json and field not in ('datetime', 'date'):
             return 'Missing at least one field: ' + repr(field), 400
 
-    conn, cursor = database.get_connection_cursor()
-    cursor.execute(
-        '''
-        INSERT INTO events (
-            event_type, event_target, user_id, path, referrer, email, handle,
-            platform, datetime, date
-        ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-        )''',
-        (
-            event_json['event_type'],
-            event_json['event_target'],
-            event_json['user_id'],
-            event_json['path'],
-            event_json['referrer'],
-            event_json['email'],
-            event_json['handle'],
-            event_json['platform'],
-            datetime.datetime.utcnow().isoformat(),
-            datetime.datetime.utcnow().date().isoformat(),
-        )
+    session = database.session
+    new_event = models.Event(
+        date=datetime.datetime.utcnow().isoformat(),
+        datetime=datetime.datetime.utcnow().date().isoformat(),
+        event_type=event_json['event_type'],
+        event_target=event_json['event_target'],
+        user_id=event_json['user_id'],
+        path=event_json['path'],
+        referrer=event_json['referrer'],
+        email=event_json['email'],
+        handle=event_json['handle'],
+        platform=event_json['platform'],
     )
+    session.add(new_event)
     # slow. should reuse one connection
-    conn.commit()
-    cursor.close()
-    conn.close()
     return '', 200

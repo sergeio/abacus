@@ -13,6 +13,7 @@ import requests
 def make_request(method='get', resource='/', json={}):
     url = 'http://localhost:8080%s' % resource
     r = getattr(requests, method.lower())(url, json=json)
+    assert r.ok
     return r
 
 def make_new_event(**args):
@@ -31,67 +32,67 @@ def make_new_event(**args):
     return r
 
 
-# def test_event_post():
-#     r = make_new_event()
-#     return r.status_code == 200
-# 
-# 
-# def test_get_events_by_day():
-#     r = make_request('post', '/events_by_day')
-#     before = len(r.json())
-#     today = datetime.datetime.utcnow().date()
-#     count_before = next(
-#         row['count'] for row in r.json()
-#         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
-#     make_new_event()
-#     r = make_request('post', '/events_by_day')
-#     count_after = next(
-#         row['count'] for row in r.json()
-#         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
-#     return count_before + 1 == count_after
-# 
-# 
-# def test_get_events_by_day_with_filters():
-#     make_new_event(user_id=99, referrer='google')
-#     r = make_request(
-#         'post',
-#         '/events_by_day',
-#         json={'filters': {'user_id': 99, 'referrer': 'google'}})
-#     before = len(r.json())
-#     today = datetime.datetime.utcnow().date()
-#     count_before = next(
-#         row['count'] for row in r.json()
-#         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
-# 
-#     # Only user_id=99 should count
-#     make_new_event(user_id=99, referrer='google')
-#     make_new_event(user_id=101, referrer='google')
-#     make_new_event(user_id=101, referrer='google')
-# 
-#     r = make_request(
-#         'post',
-#         '/events_by_day',
-#         json={'filters': {'user_id': 99, 'referrer': 'google'}})
-# 
-#     count_after = next(
-#         row['count'] for row in r.json()
-#         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
-#     return count_before + 1 == count_after
-# 
-# 
-# def test_get_events():
-#     r = make_request('get', '/events')
-#     before = len(r.json())
-#     make_new_event()
-#     make_new_event()
-#     r = make_request('get', '/events')
-# 
-#     # No key or value in table is None
-#     for row in r.json():
-#         for k, v in row.iteritems():
-#             assert k is not None, row
-#             assert v is not None, row
-#     return len(r.json()) == before + 2
+def test_event_post():
+    r = make_new_event()
+    return r.status_code == 200
+
+
+def test_get_events_by_day():
+    r = make_request('post', '/events_by_day')
+    before = len(r.json())
+    today = datetime.datetime.utcnow().date()
+    count_before = next(
+        row['count'] for row in r.json()
+        if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
+    make_new_event()
+    r = make_request('post', '/events_by_day')
+    count_after = next(
+        row['count'] for row in r.json()
+        if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
+    return count_before + 1 == count_after
+
+
+def test_get_events_by_day_with_filters():
+    make_new_event(user_id=99, referrer='google')
+    r = make_request(
+        'post',
+        '/events_by_day',
+        json={'filters': {'user_id': 99, 'referrer': 'google'}})
+    before = len(r.json())
+    today = datetime.datetime.utcnow().date()
+    count_before = next(
+        row['count'] for row in r.json()
+        if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
+
+    # Only user_id=99 should count
+    make_new_event(user_id=99, referrer='google')
+    make_new_event(user_id=101, referrer='google')
+    make_new_event(user_id=101, referrer='google')
+
+    r = make_request(
+        'post',
+        '/events_by_day',
+        json={'filters': {'user_id': 99, 'referrer': 'google'}})
+
+    count_after = next(
+        row['count'] for row in r.json()
+        if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
+    return count_before + 1 == count_after
+
+
+def test_get_events():
+    r = make_request('get', '/events')
+    before = len(r.json())
+    make_new_event()
+    make_new_event()
+    r = make_request('get', '/events')
+
+    # No key or value in table is None
+    for row in r.json():
+        for k, v in row.iteritems():
+            assert k is not None, row
+            assert v is not None, row
+    return len(r.json()) == before + 2
 
 
 def test_make_new_event_name():
