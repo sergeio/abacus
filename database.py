@@ -14,7 +14,8 @@ from sqlalchemy.orm import sessionmaker
 # grant ALL on database test to abacus;
 config = json.load(open('config.json', 'r'))
 engine = create_engine(
-    'postgresql://{db_user}:{db_password}@{db_host}/{db}'.format(**config),
+    'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db}'.format(
+        **config),
     echo=True)
 engine.connect()
 
