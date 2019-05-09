@@ -12,7 +12,8 @@ from sqlalchemy.orm import sessionmaker
 # sudo -u postgres psql
 # create user abacus with password somepass;
 # grant ALL on database test to abacus;
-config = json.load(open('config.json', 'r'))
+config_path = os.path.expanduser('~/code/abacus/config.json')
+config = json.load(open(config_path, 'r'))
 engine = create_engine(
     'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db}'.format(
         **config),
