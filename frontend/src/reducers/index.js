@@ -8,4 +8,12 @@ function filteredEvents(state = [], action) {
   }
 }
 
-export default combineReducers({filteredEvents});
+function popularEvents(state = [], action) {
+  if (action.type === 'GOT_POPULAR_EVENTS') {
+    return action.value;
+  } else {
+    return state;
+  }
+}
+
+export default combineReducers({filteredEvents, popularEvents});

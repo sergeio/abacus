@@ -68,6 +68,39 @@ def get_all_events():
     return jsonify(models.models_to_dicts(rows))
 
 
+@app.route('/popular_events', methods=['GET'])
+def get_popular_events():
+    query = database.session.query(
+        func.count(models.Event.id),
+        models.Event.event_type,
+        models.Event.event_target,
+    ).group_by(
+        models.Event.event_type,
+        models.Event.event_target,
+    ).order_by(
+        func.count(models.Event.id).desc()
+    ).limit(100)
+    events = query.all()
+
+    session = database.session
+    event_names = session.query(models.EventName).limit(1000).all()
+
+    events_dict = models.values_to_dicts(
+            events, column_names=('count', 'event_type', 'event_target'))
+
+    # TODO: This quadratic thing is baaad
+    for event in events_dict:
+        for name_row in event_names:
+            if name_row.event_type not in ('xNULL', event['event_type']):
+                continue
+            if name_row.event_target not in ('xNULL', event['event_target']):
+                continue
+            event['event_name'] = name_row.event_name
+            break
+
+    return jsonify(events_dict)
+
+
 @app.route('/new_event_name', methods=['POST'])
 def name_new_event():
     schema = [
@@ -90,8 +123,9 @@ def name_new_event():
     text_query = 'SELECT upsert_event_name({});'.format(
         ', '.join('f_{col} := :{col}'.format(col=col)
                   for col in schema))
-    cursor = session.execute(text_query,
-                             {col: event_json.get(col) for col in schema})
+    session.execute(text_query,
+                    {col: event_json.get(col) for col in schema})
+    session.commit()
     return 'ok', 200
 
 
@@ -106,6 +140,7 @@ def post_new_event():
     new_event = models.Event(
         date=datetime.datetime.utcnow().isoformat(),
         datetime=datetime.datetime.utcnow().date().isoformat(),
+
         event_type=event_json['event_type'],
         event_target=event_json['event_target'],
         user_id=event_json['user_id'],
@@ -116,5 +151,6 @@ def post_new_event():
         platform=event_json['platform'],
     )
     session.add(new_event)
+    session.commit()
     # slow. should reuse one connection
     return '', 200

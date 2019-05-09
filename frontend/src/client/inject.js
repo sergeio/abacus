@@ -5,8 +5,7 @@ import {
 
 window.addEventListener('click', (event) => {
   const options = {
-        url: (window.location.protocol + '//' + window.location.hostname +
-          ':8080/event'),
+        resource: '/event',
         data: {
             event_type: 'click',
             event_target: calculateSelector(event),

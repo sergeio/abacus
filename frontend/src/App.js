@@ -9,7 +9,7 @@ import './App.css';
 
 import Dashboard from './Dashboard';
 import Navigation from './Navigation';
-import Events from './Events';
+import EventSummary from './EventSummary';
 
 import './client/inject';
 
@@ -33,7 +33,7 @@ function App(props) {
                     <Layout {...props} title="Dashboard"><Dashboard /></Layout>
                 )} />
                 <Route exact path="/events" render={() => (
-                    <Layout {...props} title="Events"><Events /></Layout>
+                    <Layout {...props} title="Events"><EventSummary /></Layout>
                 )} />
             </Router>
         </div>

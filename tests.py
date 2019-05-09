@@ -14,7 +14,11 @@ def make_request(method='get', resource='/', json={}):
     url = 'http://localhost:8080%s' % resource
     r = getattr(requests, method.lower())(url, json=json)
     assert r.ok
-    return r
+    try:
+        return r.json()
+    except ValueError:
+        return r
+
 
 def make_new_event(**args):
     default = {
@@ -39,15 +43,15 @@ def test_event_post():
 
 def test_get_events_by_day():
     r = make_request('post', '/events_by_day')
-    before = len(r.json())
+    before = len(r)
     today = datetime.datetime.utcnow().date()
     count_before = next(
-        row['count'] for row in r.json()
+        row['count'] for row in r
         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
     make_new_event()
     r = make_request('post', '/events_by_day')
     count_after = next(
-        row['count'] for row in r.json()
+        row['count'] for row in r
         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
     return count_before + 1 == count_after
 
@@ -58,10 +62,10 @@ def test_get_events_by_day_with_filters():
         'post',
         '/events_by_day',
         json={'filters': {'user_id': 99, 'referrer': 'google'}})
-    before = len(r.json())
+    before = len(r)
     today = datetime.datetime.utcnow().date()
     count_before = next(
-        row['count'] for row in r.json()
+        row['count'] for row in r
         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
 
     # Only user_id=99 should count
@@ -75,24 +79,24 @@ def test_get_events_by_day_with_filters():
         json={'filters': {'user_id': 99, 'referrer': 'google'}})
 
     count_after = next(
-        row['count'] for row in r.json()
+        row['count'] for row in r
         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
     return count_before + 1 == count_after
 
 
 def test_get_events():
     r = make_request('get', '/events')
-    before = len(r.json())
+    before = len(r)
     make_new_event()
     make_new_event()
     r = make_request('get', '/events')
 
     # No key or value in table is None
-    for row in r.json():
+    for row in r:
         for k, v in row.iteritems():
             assert k is not None, row
             assert v is not None, row
-    return len(r.json()) == before + 2
+    return len(r) == before + 2
 
 
 def test_make_new_event_name():
@@ -118,10 +122,17 @@ def test_make_new_event_name():
         },
     )
     r = make_request('get', '/event_names')
-    r_data = r.json()
-    mappings = {row['event_name']: row for row in r_data}
+    mappings = {row['event_name']: row for row in r}
     return ('first_' + random_name not in mappings and
             random_name in mappings)
+
+
+def test_popular_events():
+    r = make_request('get', '/popular_events')
+    popular = r[0]
+    # TODO: brittle test: depends on other sources to create events, and
+    # assumes that clicks are most popular events
+    return popular['count'] > 0 and popular['event_type'] == 'click'
 
 
 def main():
