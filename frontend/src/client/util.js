@@ -15,6 +15,7 @@ export function calculateSelector(event) {
 export function indexOf(element) {
     var parent = element.parentNode;
     var child, index = 1;
+    if (!parent) return -1;
     for (child = parent.firstElementChild;
          child;
          child = child.nextElementSibling) {
