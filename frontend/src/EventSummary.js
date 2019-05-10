@@ -1,5 +1,11 @@
 import React from 'react';
 import { Component } from 'react';
+import Button from '@material-ui/core/Button';
+import Input from '@material-ui/core/Input';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { get, post } from './client/util';
@@ -63,9 +69,11 @@ class EventData extends Component {
         />
       });
     return (
-      <div className='eventData'>
-        {events}
-      </div>
+      <Table>
+        <TableBody>
+          {events}
+        </TableBody>
+      </Table>
     );
   }
 
@@ -131,7 +139,6 @@ class NameableEvent extends Component {
 
   submitEventName(event) {
     event.preventDefault()
-    console.log(this.state.tempName)
     this.props.setTempName(this.state.tempName)
     this.setState({currentlyNaming: false})
   }
@@ -146,42 +153,26 @@ class NameableEvent extends Component {
   }
 
   render() {
-    const button = <button onClick={this.onClickButton}>+name</button>;
-    const unnamedEvent = (
-      <div className='nameableEvent'>
-        <div className='eventType'>
-          {this.props.eventType}
-        </div>
-        <div className='eventTarget'>
-          {this.props.eventTarget}
-        </div>
-        {button}
-      </div>
-    );
-    const namedEvent = (
-      <div className='eventName'>
-        {this.props.eventName}
-        {button}
-      </div>
-    );
-    const textbox = <form onSubmit={this.submitEventName}>
-      <label>
-        <input
-          autoFocus
-          type='text'
-          value={this.state.tempName}
-          onChange={this.onChangeEventName}
-        />
-      </label>
-    </form>
-
-    if (this.state.currentlyNaming) {
-      return textbox;
-    } else if (this.props.eventName) {
-      return namedEvent;
-    } else {
-      return unnamedEvent;
-    }
+    return (
+      <TableRow>
+        <TableCell>{this.props.eventType}</TableCell>
+        <TableCell>{this.props.eventName || this.props.eventTarget}</TableCell>
+        <TableCell align='right'>
+          {this.state.currentlyNaming ?
+              <form onSubmit={this.submitEventName}>
+                <Input
+                  autoFocus
+                  type='text'
+                  value={this.state.tempName}
+                  onChange={this.onChangeEventName}
+                />
+              </form>
+              :
+              <Button size='small' onClick={this.onClickButton}>+name</Button>
+          }
+        </TableCell>
+      </TableRow>
+    )
   }
 
 }

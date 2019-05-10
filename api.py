@@ -126,7 +126,7 @@ def name_new_event():
     session.execute(text_query,
                     {col: event_json.get(col) for col in schema})
     session.commit()
-    return 'ok', 200
+    return jsonify({'ok': True}), 200
 
 
 @app.route('/event', methods=['POST'])
