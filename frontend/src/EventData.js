@@ -1,10 +1,26 @@
 import React from 'react';
 import { Component } from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { withStyles } from '@material-ui/core/styles';
+import Input from '@material-ui/core/Input';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
 
 import { Line } from 'react-chartjs';
 
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  formControl: {
+    margin: theme.spacing.unit,
+    minWidth: 200,
+  },
+});
 
 class EventData extends Component {
   static propTypes = {
@@ -32,23 +48,31 @@ class EventData extends Component {
   }
 
   render() {
-      return (
-          <div>
-              <Dropdown
-                  values={[
-                      'user_id', 'event_type', 'event_target', 'path', 'referrer',
-                      'email', 'handle', 'platform', 'datetime', 'date',
-                  ]}
-                  onChange={ this.onChangeFilterKey }
-               />
-               <TextBox onSubmit={ this.onSubmitFilterValue } />
-               <Chart data={this.props.filteredEvents} />
-               <p>
-                   "{this.state.filterKey}"<br />
-                   "{this.state.filterValue}"<br />
-               </p>
-          </div>
-      );
+    const { classes } = this.props;
+    return (
+      <div>
+        <form>
+          <FormControl className={classes.formControl}>
+            <InputLabel> filter </InputLabel>
+            <Select value={this.state.filterKey} onChange={ this.onChangeFilterKey } >
+              {[
+                'user_id', 'event_type', 'event_target', 'path', 'referrer',
+                'email', 'handle', 'platform', 'datetime', 'date',
+              ].map((filter) => {
+                return <MenuItem key={filter} value={filter}> {filter} </MenuItem>
+              })}
+            </Select>
+          </FormControl>
+        </form>
+
+        <TextBox onSubmit={ this.onSubmitFilterValue } />
+        <Chart data={this.props.filteredEvents} />
+        <p>
+          "{this.state.filterKey}"<br />
+          "{this.state.filterValue}"<br />
+        </p>
+      </div>
+    );
   }
 }
 
@@ -83,7 +107,8 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(EventData);
+EventData = connect(mapStateToProps, mapDispatchToProps)(EventData);
+export default withStyles(styles)(EventData);
 
 
 class Chart extends Component {
@@ -141,26 +166,6 @@ class Chart extends Component {
 };
 
 
-class Dropdown extends Component {
-
-  static propTypes = {
-    onChange: PropTypes.func.isRequired,
-    values: PropTypes.arrayOf(PropTypes.string.isRequired),
-  }
-
-  render() {
-    const options = this.props.values.map((value) => {
-      return <option key={value} value={value} > {value} </option>
-    });
-
-    return (
-      <select onChange={this.props.onChange} >
-        {options}
-      </select>
-    );
-  }
-}
-
 class TextBox extends Component {
 
   static propTypes = {
@@ -187,7 +192,7 @@ class TextBox extends Component {
     return (
       <form onSubmit={this.handleSubmit} >
         <label>
-          <input type="text" name="name" onChange={this.onChange}/>
+          <Input onChange={this.onChange}/>
         </label>
       </form>
     );
