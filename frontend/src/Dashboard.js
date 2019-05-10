@@ -34,7 +34,7 @@ class Dashboard extends React.Component {
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <div className={classes.tableContainer}>
-              <EventData />
+            <EventData />
           </div>
         </main>
       </div>

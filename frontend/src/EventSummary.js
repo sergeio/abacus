@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import { get, post } from './client/util';
 
 
-class EventData extends Component {
+class EventSummary extends Component {
   static propTypes = {
     popularEvents: PropTypes.any,
     getEventsByType: PropTypes.func.isRequired,
@@ -32,7 +32,7 @@ class EventData extends Component {
   }
 
   getEventName(event) {
-    return this.state.tempNames[EventData.computeEventKey(event)]
+    return this.state.tempNames[EventSummary.computeEventKey(event)]
   }
 
   createSetTempnameCallback(event) {
@@ -45,7 +45,7 @@ class EventData extends Component {
 
   setTempName(event, tempName) {
     this.setState((state) => {
-      const eventKey = EventData.computeEventKey(event)
+      const eventKey = EventSummary.computeEventKey(event)
       const newTempNames = {
         ...state.tempNames,
         ...{[eventKey]: tempName},
@@ -61,7 +61,7 @@ class EventData extends Component {
       this.props.popularEvents.data &&
       this.props.popularEvents.data.map((event) => {
         return <NameableEvent
-          key={EventData.computeEventKey(event)}
+          key={EventSummary.computeEventKey(event)}
           eventType={event.event_type}
           eventTarget={event.event_target}
           eventName={this.getEventName(event) || event.event_name}
@@ -135,6 +135,7 @@ class NameableEvent extends Component {
     this.onClickButton = this.onClickButton.bind(this)
     this.submitEventName = this.submitEventName.bind(this)
     this.onChangeEventName = this.onChangeEventName.bind(this)
+    this.escFunction = this.escFunction.bind(this)
   }
 
   submitEventName(event) {
@@ -152,22 +153,40 @@ class NameableEvent extends Component {
     this.setState({currentlyNaming: true})
   }
 
+  escFunction(event){
+    // Revert name-setting when <esc> key is pressed
+    if(event.keyCode === 27) {
+      this.setState({currentlyNaming: false, tempName: this.props.eventName})
+    }
+  }
+  componentDidMount(){
+    document.addEventListener("keydown", this.escFunction, false);
+  }
+  componentWillUnmount(){
+    document.removeEventListener("keydown", this.escFunction, false);
+  }
+
   render() {
     return (
       <TableRow>
         <TableCell>{this.props.eventType}</TableCell>
-        <TableCell>{this.props.eventName || this.props.eventTarget}</TableCell>
-        <TableCell align='right'>
+        <TableCell>
           {this.state.currentlyNaming ?
               <form onSubmit={this.submitEventName}>
                 <Input
                   autoFocus
                   type='text'
+                  fullWidth
                   value={this.state.tempName}
                   onChange={this.onChangeEventName}
                 />
               </form>
               :
+              this.props.eventName || this.props.eventTarget
+          }
+        </TableCell>
+        <TableCell align='right'>
+          {!this.state.currentlyNaming &&
               <Button size='small' onClick={this.onClickButton}>+name</Button>
           }
         </TableCell>
@@ -177,4 +196,4 @@ class NameableEvent extends Component {
 
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(EventData);
+export default connect(mapStateToProps, mapDispatchToProps)(EventSummary);
