@@ -29,14 +29,13 @@ def get_git_head_sha():
 def get_events_by_day():
     session = database.get_session()
     event_json = request.get_json() or {}
-
     filters = event_json.get('filters', {})
 
     query = session.query(func.count(models.Event.id), models.Event.date)
     if filters:
         valid_filters = set([c.key for c in models.Event.__table__.columns])
         filters = dict((k, v) for (k, v) in filters.iteritems()
-                   if k in valid_filters)
+                   if k in valid_filters and k in filters)
         query = query.filter_by(**filters)
 
     query = query.group_by(models.Event.date)
