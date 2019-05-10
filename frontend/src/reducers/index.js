@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 
-function filteredEvents(state = [], action) {
+function filteredEvents(state = {}, action) {
   if (action.type === 'GOT_FILTERED_EVENTS') {
     return action.value;
   } else {

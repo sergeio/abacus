@@ -1,20 +1,22 @@
 import React from 'react';
 import { Component } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import { get, post } from './client/util';
+import { getFilteredEventsWithDispatch } from './actions';
 
 
 class EventSummary extends Component {
   static propTypes = {
-    popularEvents: PropTypes.any,
     getEventsByType: PropTypes.func.isRequired,
+    getFilteredEvents: PropTypes.func.isRequired,
+    popularEvents: PropTypes.any,
     saveEventName: PropTypes.func.isRequired,
   }
 
@@ -56,15 +58,15 @@ class EventSummary extends Component {
   }
 
   render() {
-    console.log(this.state.tempNames)
     const events = this.props.popularEvents &&
       this.props.popularEvents.data &&
       this.props.popularEvents.data.map((event) => {
         return <NameableEvent
           key={EventSummary.computeEventKey(event)}
-          eventType={event.event_type}
-          eventTarget={event.event_target}
           eventName={this.getEventName(event) || event.event_name}
+          eventTarget={event.event_target}
+          eventType={event.event_type}
+          getFilteredEvents={this.props.getFilteredEvents}
           setTempName={this.createSetTempnameCallback(event)}
         />
       });
@@ -90,6 +92,9 @@ function mapDispatchToProps(dispatch) {
           value: data,
         })
       })
+    },
+    getFilteredEvents: (filterKey, filterValue) => {
+      return getFilteredEventsWithDispatch(dispatch, filterKey, filterValue);
     },
     saveEventName: (event, name) => {
       post({
@@ -123,6 +128,7 @@ class NameableEvent extends Component {
     eventName: PropTypes.string,
     eventTarget: PropTypes.string.isRequired,
     eventType: PropTypes.string.isRequired,
+    getFilteredEvents: PropTypes.func.isRequired,
     setTempName: PropTypes.func.isRequired,
   }
 
@@ -136,6 +142,7 @@ class NameableEvent extends Component {
     this.submitEventName = this.submitEventName.bind(this)
     this.onChangeEventName = this.onChangeEventName.bind(this)
     this.escFunction = this.escFunction.bind(this)
+    this.graphThisRow = this.graphThisRow.bind(this)
   }
 
   submitEventName(event) {
@@ -166,10 +173,15 @@ class NameableEvent extends Component {
     document.removeEventListener("keydown", this.escFunction, false);
   }
 
+  graphThisRow() {
+    // TODO: Specify the event_target as well
+    this.props.getFilteredEvents('event_target', this.props.eventTarget)
+  }
+
   render() {
     return (
       <TableRow>
-        <TableCell>{this.props.eventType}</TableCell>
+        <TableCell onClick={this.graphThisRow}>{this.props.eventType}</TableCell>
         <TableCell>
           {this.state.currentlyNaming ?
               <form onSubmit={this.submitEventName}>
@@ -182,7 +194,9 @@ class NameableEvent extends Component {
                 />
               </form>
               :
-              this.props.eventName || this.props.eventTarget
+              <div onClick={this.graphThisRow}>
+                {this.props.eventName || this.props.eventTarget}
+              </div>
           }
         </TableCell>
         <TableCell align='right'>

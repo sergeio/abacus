@@ -12,6 +12,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 
 import EventSummary from './EventSummary';
+import { getFilteredEventsWithDispatch } from './actions';
 
 
 const styles = theme => ({
@@ -27,7 +28,7 @@ const styles = theme => ({
 
 class EventGraph extends Component {
   static propTypes = {
-    filteredEvents: PropTypes.arrayOf(PropTypes.any),
+    filteredEvents: PropTypes.any,
     getFilteredEvents: PropTypes.func.isRequired,
   }
 
@@ -35,10 +36,7 @@ class EventGraph extends Component {
     super(props);
     this.onChangeFilterKey = this.onChangeFilterKey.bind(this);
     this.onSubmitFilterValue = this.onSubmitFilterValue.bind(this);
-    this.state = {
-      filterKey: 'user_id',
-      filterValue: 31,
-    }
+    this.state = { ...this.props.filteredEvents };
     this.props.getFilteredEvents(this.state.filterKey, this.state.filterValue);
   }
 
@@ -75,11 +73,7 @@ class EventGraph extends Component {
         <TextBox
           initialValue={this.state.filterValue}
           onSubmit={this.onSubmitFilterValue} />
-        <Chart data={this.props.filteredEvents} />
-        <p>
-          "{this.state.filterKey}"<br />
-          "{this.state.filterValue}"<br />
-        </p>
+        <Chart data={this.props.filteredEvents.data} />
       </div>
     );
   }
@@ -88,32 +82,16 @@ class EventGraph extends Component {
 function mapDispatchToProps(dispatch) {
   return {
     getFilteredEvents: (filterKey, filterValue) => {
-      fetch(
-        (window.location.protocol + '//' + window.location.hostname +
-          ':8080/events_by_day'),
-        {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json, text/plain, */*',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({filters: {[filterKey]: filterValue}}),
-        }
-      ).then((result) => result.json()
-      ).then((data) => {
-        dispatch({
-          type: 'GOT_FILTERED_EVENTS',
-          value: data,
-        });
-      }).catch((error) => console.log(error))
+      return getFilteredEventsWithDispatch(dispatch, filterKey, filterValue);
     }
   }
 }
 
 function mapStateToProps(state) {
-  return {
-    filteredEvents: state.filteredEvents || []
-  }
+  const filteredEvents = state.filteredEvents.data ?
+    { ...state.filteredEvents } :
+    {data: [], filterKey: 'user_id', filterValue: '31'}
+  return { filteredEvents }
 }
 
 EventGraph = connect(mapStateToProps, mapDispatchToProps)(EventGraph);
@@ -126,7 +104,7 @@ class EventData extends Component {
 
   render() {
     return (
-      <Grid container spacing={24}>
+      <Grid container >
         <Grid item xs={6}>
           <EventGraph />
         </Grid>
