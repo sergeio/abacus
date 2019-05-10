@@ -27,7 +27,7 @@ def get_git_head_sha():
 
 @app.route('/events_by_day', methods=['post'])
 def get_events_by_day():
-    session = database.session
+    session = database.get_session()
     event_json = request.get_json() or {}
 
     filters = event_json.get('filters', {})
@@ -47,6 +47,7 @@ def get_events_by_day():
 
     data = filter(lambda row: row.get('date'), data)
 
+    session.close()
     for row in data:
         row['date'] = str(row['date'])
     return jsonify(data)
@@ -54,23 +55,26 @@ def get_events_by_day():
 
 @app.route('/events', methods=['GET'])
 def get_events():
-    session = database.session
+    session = database.get_session()
     query = session.query(models.Event).limit(1000)
     rows = query.all()
+    session.close()
     return jsonify(models.models_to_dicts(rows))
 
 
 @app.route('/event_names', methods=['GET'])
 def get_all_events():
-    session = database.session
+    session = database.get_session()
     query = session.query(models.EventName).limit(1000)
     rows = query.all()
+    session.close()
     return jsonify(models.models_to_dicts(rows))
 
 
 @app.route('/popular_events', methods=['GET'])
 def get_popular_events():
-    query = database.session.query(
+    session = database.get_session()
+    query = session.query(
         func.count(models.Event.id),
         models.Event.event_type,
         models.Event.event_target,
@@ -82,7 +86,6 @@ def get_popular_events():
     ).limit(100)
     events = query.all()
 
-    session = database.session
     event_names = session.query(models.EventName).limit(1000).all()
 
     events_dict = models.values_to_dicts(
@@ -98,6 +101,7 @@ def get_popular_events():
             event['event_name'] = name_row.event_name
             break
 
+    session.close()
     return jsonify(events_dict)
 
 
@@ -119,13 +123,14 @@ def name_new_event():
     if 'event_name' not in event_json:
         return 'Missing event_name in json', 400
 
-    session = database.session
+    session = database.get_session()
     text_query = 'SELECT upsert_event_name({});'.format(
         ', '.join('f_{col} := :{col}'.format(col=col)
                   for col in schema))
     session.execute(text_query,
                     {col: event_json.get(col) for col in schema})
     session.commit()
+    session.close()
     return jsonify({'ok': True}), 200
 
 
@@ -136,7 +141,7 @@ def post_new_event():
         if field not in event_json and field not in ('datetime', 'date'):
             return 'Missing at least one field: ' + repr(field), 400
 
-    session = database.session
+    session = database.get_session()
     new_event = models.Event(
         date=datetime.datetime.utcnow().isoformat(),
         datetime=datetime.datetime.utcnow().date().isoformat(),
@@ -152,5 +157,5 @@ def post_new_event():
     )
     session.add(new_event)
     session.commit()
-    # slow. should reuse one connection
+    session.close()
     return '', 200

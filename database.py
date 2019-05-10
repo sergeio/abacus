@@ -20,9 +20,13 @@ engine = create_engine(
     echo=True)
 engine.connect()
 
+
 Session = sessionmaker()
 Session.configure(bind=engine)
-session = Session()
+
+
+def get_session():
+    return Session()
 
 
 def show_warnings(session):
