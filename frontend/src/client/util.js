@@ -189,6 +189,25 @@ export const debounce = (callback, wait, context = this) => {
     };
 };
 
+function detectPlatform(userAgent) {
+    // https://techblog.willshouse.com/2012/01/03/most-common-user-agents/
+    let platform = 'strange';
+    if (userAgent.match(/Windows/)) {
+        platform = 'windows';
+    } else if (userAgent.match(/Macintosh/)) {
+        platform = 'mac';
+    } else if (userAgent.match(/Linux/)) {
+        platform = 'linux';
+    } else if (userAgent.match(/iPad/)) {
+        platform = 'ios';
+    } else if (userAgent.match(/iPhone/)) {
+        platform = 'ios';
+    } else if (userAgent.match(/Android/)) {
+        platform = 'android'
+    }
+    return platform;
+}
+
 export const makeData = (overrides) => {
     const defaults = {
         event_type: 'defaultTypeE',
@@ -198,7 +217,7 @@ export const makeData = (overrides) => {
         referrer: window.document.referrer,
         email: 'test@example.com',
         handle: 'coolguy223',
-        platform: 'iOS',
+        platform: detectPlatform(navigator.userAgent),
     }
 
     /* TODO: Maybe we can't use spread syntax if this is going to run on
