@@ -159,7 +159,6 @@ class Chart extends Component {
       labels: labels,
       datasets: [
         {
-          label: "My First dataset",
           fillColor: "rgba(220,220,220,0.2)",
           strokeColor: "rgba(220,220,220,1)",
           pointColor: "rgba(220,220,220,1)",
@@ -170,7 +169,7 @@ class Chart extends Component {
         },
       ]
     };
-    return <Line data={data} options={{}} width="500" height="250"/>
+    return <Line data={data} width="500" height="250" redraw />
   }
 };
 
