@@ -34,7 +34,6 @@ class Dashboard extends React.Component {
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <div className={classes.tableContainer}>
-            <a href='http://10.0.0.203:3000/dashboard#1'> link </a>
             <EventData />
           </div>
         </main>
