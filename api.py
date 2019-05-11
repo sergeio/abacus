@@ -144,7 +144,7 @@ def post_new_event():
     session = database.get_session()
     new_event = models.Event(
         date=datetime.datetime.utcnow().isoformat(),
-        datetime=datetime.datetime.utcnow().date().isoformat(),
+        datetime=datetime.datetime.utcnow().isoformat(),
 
         event_type=event_json['event_type'],
         event_target=event_json.get('event_target'),
