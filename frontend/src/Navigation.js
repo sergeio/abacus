@@ -110,8 +110,6 @@ const styles = theme => {
 }
 
 export function Navigation({ classes, match, children, title }) {
-    console.log(title);
-
     return (
       <div className={classes.root}>
         <CssBaseline />

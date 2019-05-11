@@ -188,3 +188,21 @@ export const debounce = (callback, wait, context = this) => {
         timeout = setTimeout(later, wait);
     };
 };
+
+export const makeData = (overrides) => {
+    const defaults = {
+        event_type: 'defaultTypeE',
+        event_target: undefined,
+        user_id: 31,
+        path: window.location.href,
+        referrer: window.document.referrer,
+        email: 'test@example.com',
+        handle: 'coolguy223',
+        platform: 'iOS',
+    }
+
+    /* TODO: Maybe we can't use spread syntax if this is going to run on
+     * arbitrary sites that aren't transpiling their js.
+     */
+    return {...defaults, ...overrides}
+}

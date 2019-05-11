@@ -137,7 +137,8 @@ def name_new_event():
 def post_new_event():
     event_json = request.get_json() or {}
     for field in schema.events:
-        if field not in event_json and field not in ('datetime', 'date'):
+        if field not in event_json and field not in (
+                'datetime', 'date', 'event_target'):
             return 'Missing at least one field: ' + repr(field), 400
 
     session = database.get_session()
@@ -146,7 +147,7 @@ def post_new_event():
         datetime=datetime.datetime.utcnow().date().isoformat(),
 
         event_type=event_json['event_type'],
-        event_target=event_json['event_target'],
+        event_target=event_json.get('event_target'),
         user_id=event_json['user_id'],
         path=event_json['path'],
         referrer=event_json['referrer'],
