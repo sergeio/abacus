@@ -36,14 +36,17 @@ function urlChange(state) {
     pushstate: 'navigation',
   }[state.type] || state.type || 'urlChange'
   const options = {
-        resource: '/event',
-        data: makeData({event_type: type}),
-        onSuccess: (response) => {},
-        onError: (error) => {
-            console.warn(error);
-        }
-    };
-    post(options);
+    resource: '/event',
+    data: makeData({
+      event_type: type,
+      event_target: window.location.pathname,
+    }),
+    onSuccess: (response) => {},
+    onError: (error) => {
+      console.warn(error);
+    }
+  };
+  post(options);
 }
 
 window.addEventListener('hashchange', urlChange)
@@ -53,7 +56,10 @@ window.history.onpushstate = urlChange
 window.onload = function() {
   const options = {
         resource: '/event',
-        data: makeData({event_type: 'truePageLoad'}),
+        data: makeData({
+          event_type: 'truePageLoad',
+          event_target: window.location.pathname,
+        }),
         onSuccess: (response) => {},
         onError: (error) => {
             console.warn(error);

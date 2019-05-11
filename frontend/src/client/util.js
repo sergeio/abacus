@@ -213,7 +213,7 @@ export const makeData = (overrides) => {
         event_type: 'defaultTypeE',
         event_target: undefined,
         user_id: 31,
-        path: window.location.href,
+        path: window.location.pathname + (window.location.hash || ''),
         referrer: window.document.referrer,
         email: 'test@example.com',
         handle: 'coolguy223',
