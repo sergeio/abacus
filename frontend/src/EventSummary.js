@@ -71,11 +71,14 @@ class EventSummary extends Component {
         />
       });
     return (
-      <Table>
-        <TableBody>
-          {events}
-        </TableBody>
-      </Table>
+      // TODO: Fix this 80vh hack.  Use flexbox somehow
+      <div style={{height: '80vh', overflowY: 'scroll'}} >
+        <Table>
+          <TableBody>
+            {events}
+          </TableBody>
+        </Table>
+      </div>
     );
   }
 

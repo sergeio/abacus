@@ -13,7 +13,9 @@ const styles = theme => {
       content: {
         flexGrow: 1,
         padding: theme.spacing(3),
-        height: '100vh',
+        // TODO: Figure out how to make this play nicely with flexbox and the
+        // navigation header
+        height: '90vh',
         overflow: 'auto',
       },
       tableContainer: {
