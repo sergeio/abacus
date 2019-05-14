@@ -20,12 +20,12 @@ function filteredEvents(state = {}, action) {
     if (action.value.data && action.value.data[0]) {
       const minDataDate = action.value.data[0].date
       const maxDataDate = action.value.data[action.value.data.length - 1].date
-      if (!globalMinDataDate || (minDataDate < globalMinDataDate)) {
+      if (!globalMinDataDate || (minDataDate <= globalMinDataDate)) {
         globalMinDataDate = minDataDate
       } else {
         action.value.data.unshift({count: 0, date: globalMinDataDate})
       }
-      if (!globalMaxDataDate || (maxDataDate > globalMaxDataDate)) {
+      if (!globalMaxDataDate || (maxDataDate >= globalMaxDataDate)) {
         globalMaxDataDate = maxDataDate
       } else {
         action.value.data.push({count: 0, date: globalMaxDataDate})
