@@ -15,6 +15,21 @@ import {
     };
 })(window.history);
 
+window.addEventListener('submit', (event) => {
+  const options = {
+        resource: '/event',
+        data: makeData({
+          event_type: 'formSubmit',
+          event_target: calculateSelector(event),
+        }),
+        onSuccess: (response) => {},
+        onError: (error) => {
+            console.warn(error);
+        }
+    };
+    post(options);
+});
+
 window.addEventListener('click', (event) => {
   const options = {
         resource: '/event',
