@@ -33,7 +33,7 @@ function calculateIdentifier(element) {
   } else if (element.attributes && element.attributes.length > 0) {
     for (var attr of element.attributes) {
       if (attr.name.startsWith('data-')) {
-        return '#d#' + attr.value;
+        return '##d' + attr.value;
       }
     }
   }
