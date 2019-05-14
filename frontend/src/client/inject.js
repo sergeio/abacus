@@ -20,7 +20,7 @@ window.addEventListener('submit', (event) => {
         resource: '/event',
         data: makeData({
           event_type: 'formSubmit',
-          event_target: calculateSelector(event),
+          event_target: calculateSelector(event.target),
         }),
         onSuccess: (response) => {},
         onError: (error) => {
@@ -35,7 +35,7 @@ window.addEventListener('click', (event) => {
         resource: '/event',
         data: makeData({
           event_type: 'click',
-          event_target: calculateSelector(event),
+          event_target: calculateSelector(event.target),
         }),
         onSuccess: (response) => {},
         onError: (error) => {

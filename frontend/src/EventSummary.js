@@ -184,7 +184,7 @@ class NameableEvent extends Component {
   render() {
     return (
       <TableRow>
-        <TableCell onClick={this.graphThisRow}>{this.props.eventType}</TableCell>
+        <TableCell className='eventType' onClick={this.graphThisRow}>{this.props.eventType}</TableCell>
         <TableCell>
           {this.state.currentlyNaming ?
               <form onSubmit={this.submitEventName}>
@@ -204,7 +204,7 @@ class NameableEvent extends Component {
         </TableCell>
         <TableCell align='right'>
           {!this.state.currentlyNaming &&
-              <Button size='small' onClick={this.onClickButton}>+name</Button>
+              <Button className='nameEvent' size='small' onClick={this.onClickButton}>+name</Button>
           }
         </TableCell>
       </TableRow>

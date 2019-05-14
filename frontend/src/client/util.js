@@ -2,18 +2,41 @@ const port = '8080';
 const baseUrl =
   `${window.location.protocol}//${window.location.hostname}:${port}`;
 
-export function calculateSelector(event) {
-    var element = event.target;
-    var selector = element.tagName + ":nth-child(" + indexOf(element) + ")";
-    while ((element = element.parentElement) != null) {
-        if (element.tagName === "BODY") {
-            selector = "BODY > " + selector;
-            break;
-        }
-        selector = element.tagName + ":nth-child(" + indexOf(element) + ") > " + selector;
-    }
+export function calculateSelector(element) {
+    var identifier = calculateIdentifier(element);
 
-    return selector;
+    if (identifier) {
+      return element.tagName + identifier;
+
+    } else if (element.parentNode) {
+      return calculateSelector(element.parentNode) + ' > ' + element.tagName;
+
+    } else {
+      return element.tagName;
+    }
+}
+
+function calculateIdentifier(element) {
+  if (element.id) {
+    return '#' + element.id;
+
+  } else if (element.attributes['data-id']) {
+    return '#' + element.attributes['data-id'];
+
+  } else if (element.classList && element.classList[0]
+                               && element.classList[0][0] !== '_') {
+    // TODO: Look at popular inline stylye libraries to learn to detect their
+    // naming conventions
+    // Using classList here because className can be an object eg in SVGs
+    return '.' + element.classList.toString();
+
+  } else if (element.attributes && element.attributes.length > 0) {
+    for (var attr of element.attributes) {
+      if (attr.name.startsWith('data-')) {
+        return '#d#' + attr.value;
+      }
+    }
+  }
 }
 
 export function indexOf(element) {
