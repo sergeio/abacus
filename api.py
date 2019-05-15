@@ -25,11 +25,13 @@ def get_git_head_sha():
     return "%s\n%s" % (c.hexsha, c.message)
 
 
-@app.route('/events_by_day', methods=['post'])
-def get_events_by_day():
+@app.route('/events_query', methods=['post'])
+def query_events():
     session = database.get_session()
     event_json = request.get_json() or {}
     filters = event_json.get('filters', {})
+    group_by = event_json.get('group_by', 'date')
+    order_by = event_json.get('order_by', 'date')
 
     query = session.query(func.count(models.Event.id), models.Event.date)
     if filters:
@@ -38,8 +40,8 @@ def get_events_by_day():
                    if k in valid_filters and k in filters)
         query = query.filter_by(**filters)
 
-    query = query.group_by(models.Event.date)
-    query = query.order_by(models.Event.date)
+    query = query.group_by(getattr(models.Event, group_by))
+    query = query.order_by(getattr(models.Event, order_by))
     query = query.limit(1000)
     data = query.all()
     data = models.values_to_dicts(data, column_names=('count', 'date'))

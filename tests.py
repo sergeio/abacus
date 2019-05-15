@@ -41,26 +41,26 @@ def test_event_post():
     return r.status_code == 200
 
 
-def test_get_events_by_day():
-    r = make_request('post', '/events_by_day')
+def test_querying_events():
+    r = make_request('post', '/events_query')
     before = len(r)
     today = datetime.datetime.utcnow().date()
     count_before = next(
         row['count'] for row in r
         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
     make_new_event()
-    r = make_request('post', '/events_by_day')
+    r = make_request('post', '/events_query')
     count_after = next(
         row['count'] for row in r
         if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() == today)
     return count_before + 1 == count_after
 
 
-def test_get_events_by_day_with_filters():
+def test_querying_events_with_filters():
     make_new_event(user_id=99, referrer='google')
     r = make_request(
         'post',
-        '/events_by_day',
+        '/events_query',
         json={'filters': {'user_id': 99, 'referrer': 'google'}})
     before = len(r)
     today = datetime.datetime.utcnow().date()
@@ -75,7 +75,7 @@ def test_get_events_by_day_with_filters():
 
     r = make_request(
         'post',
-        '/events_by_day',
+        '/events_query',
         json={'filters': {'user_id': 99, 'referrer': 'google'}})
 
     count_after = next(
