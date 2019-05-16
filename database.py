@@ -17,7 +17,7 @@ config = json.load(open(config_path, 'r'))
 engine = create_engine(
     'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db}'.format(
         **config),
-    echo=True)
+    echo=False)
 engine.connect()
 
 
