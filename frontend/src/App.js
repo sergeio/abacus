@@ -10,6 +10,7 @@ import './App.css';
 import Dashboard from './Dashboard';
 import Navigation from './Navigation';
 import EventSummary from './EventSummary';
+import Funnels from './Funnels';
 
 import './client/inject';
 
@@ -34,6 +35,9 @@ function App(props) {
                 )} />
                 <Route exact path="/events" render={() => (
                     <Layout {...props} title="Events"><EventSummary /></Layout>
+                )} />
+                <Route exact path="/funnels" render={() => (
+                    <Layout {...props} title="Funnels"><Funnels /></Layout>
                 )} />
             </Router>
         </div>

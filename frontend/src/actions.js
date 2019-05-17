@@ -8,7 +8,9 @@ function getFilteredEventsWithDispatch(dispatch, filterKey, filterValue) {
         'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({filters: {[filterKey]: filterValue}}),
+      body: JSON.stringify({
+        filters: {[filterKey]: filterValue},
+      }),
     }
   ).then((result) => result.json()
   ).then((data) => {

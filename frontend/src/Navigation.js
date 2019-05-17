@@ -12,6 +12,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Grid from '@material-ui/core/Grid';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import TouchIcon from '@material-ui/icons/TouchApp';
+import PollIcon from '@material-ui/icons/Poll';
 import { Link } from "react-router-dom";
 
 const drawerWidth = 240;
@@ -146,17 +147,27 @@ export function Navigation({ classes, match, children, title }) {
           }}
           open
         >
-            <Grid container className={classes.navContainer}>
-                <Grid item xs={8}>
+            <Grid container
+              alignItems='center'
+              direction='column'
+              className={classes.navContainer}
+            >
+                <Grid item xs={4}>
                     <Link to='/dashboard' className={classNames(classes.link)}>
                         <DashboardIcon className={classes.icon} />
                         <Typography>Dashboard</Typography>
                     </Link>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid item xs={4}>
                     <Link to='/events' className={classNames(classes.link)}>
                         <TouchIcon className={classes.icon} />
                         <Typography>Events</Typography>
+                    </Link>
+                </Grid>
+                <Grid item xs={4}>
+                    <Link to='/funnels' className={classNames(classes.link)}>
+                        <PollIcon className={classes.icon} />
+                        <Typography>Funnels</Typography>
                     </Link>
                 </Grid>
 
