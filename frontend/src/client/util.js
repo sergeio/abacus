@@ -94,6 +94,10 @@ export const post = (options) => {
     request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     request.setRequestHeader('Accept', 'application/json');
 
+    if (!onError) {
+        onError = (e) => console.error(e)
+    }
+
     request.onload = () => {
         if (request.status >= 200 && request.status < 400) {
             let response;

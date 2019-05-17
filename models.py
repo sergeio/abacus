@@ -115,7 +115,7 @@ def create_event_name_upsert_function(target, connection, **kwargs):
                 -- first try to update the event_name
                 UPDATE %s
                     SET event_name = f_event_name
-                    WHERE email = email
+                    WHERE email = f_email
                         AND event_target = f_event_target
                         AND event_type = f_event_type
                         AND handle = f_handle

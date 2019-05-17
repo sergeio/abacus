@@ -37,6 +37,28 @@ function filteredEvents(state = {}, action) {
   }
 }
 
+function eventNames(state = [], action) {
+  if (action.type === 'GOT_EVENT_NAMES') {
+    return action.value;
+  } else {
+    return state;
+  }
+}
+
+
+let eventsByNameCache = {}
+function eventsByName(state = {}, action) {
+  if (action.type === 'GOT_EVENTS_BY_NAME') {
+    if (action.value) {
+      eventsByNameCache = {...eventsByNameCache, ...action.value}
+    }
+    return eventsByNameCache;
+  } else {
+    return state;
+  }
+}
+
+
 function popularEvents(state = [], action) {
   if (action.type === 'GOT_POPULAR_EVENTS') {
     return action.value;
@@ -45,4 +67,9 @@ function popularEvents(state = [], action) {
   }
 }
 
-export default combineReducers({filteredEvents, popularEvents});
+export default combineReducers({
+  eventNames,
+  eventsByName,
+  filteredEvents,
+  popularEvents,
+});

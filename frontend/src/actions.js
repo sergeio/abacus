@@ -1,14 +1,16 @@
 function getFilteredEventsWithDispatch(dispatch, filterKey, filterValue) {
   fetch(
     (window.location.protocol + '//' + window.location.hostname +
-      ':8080/events_by_day'),
+      ':8080/events_query'),
     {
       method: 'POST',
       headers: {
         'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({filters: {[filterKey]: filterValue}}),
+      body: JSON.stringify({
+        filters: {[filterKey]: filterValue},
+      }),
     }
   ).then((result) => result.json()
   ).then((data) => {
