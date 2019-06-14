@@ -26,7 +26,7 @@ Assumptions
   - You have Postgres >= 10.8 installed, and running with the appropriate
     user/password/port/..
     + See `config.json`
-  - Python >= 2.7+
+  - Python >= 2.7
   - Virtualenv >= 16.1.0
 
 
